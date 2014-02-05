@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+	<title> 2D Random Walk </title>
+<!--     <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script> -->
+    <script src="d3.v3.js"></script>
+</head>
+<body>
+
+	<script>
+		
+		function initx(x0,npart){ //initialization position in x
+		  var ra = [];
+		  for(var i=0; i<npart; i++){
+			ra[i] = x0; 
+		  }
+		  return ra;
+		}
+
+		function inity(y0,npart){ //initialization position in y
+		  var ra = [];
+		  for(var i=0; i<npart; i++){
+			ra[i] = y0; 
+		  }
+		  return ra;
+		}
+
+		function random_path(xstart,npart){ //moves particles left or right with uniform distribution
+		  var ra = [];
+		  for(var i=0; i<npart; i++){
+		  	L = 10.0; //size of uniform distribution function
+			ra[i] = xstart[i] + (Math.random()*L - L/2.0); //updates position of particle
+		  }
+		  return ra;
+		}
+		
+		function radius(xstart,ystart,x0,y0,npart){ //calculates radial position of particle
+		  var r = [];
+		  for(var i=0; i<npart; i++){
+			r[i] = Math.sqrt( Math.pow(xstart[i]-x0[i],2) + Math.pow(ystart[i]-y0[i],2) ); //calculates radius of particle
+		  }
+		  return r;
+		}
+		
+
+		//---- USER DEFINED PARAMETER -----
+		var x0 = 100;
+		var y0 = 100;
+		var npart = 200; //number of particles to use
+		//----------------------------------
+		var x0v = initx(x0,npart) //vector initialization
+		var y0v = inity(y0,npart) //vector initialization
+
+
+		var width = 1000;
+		var height = 1000;								
+
+		var svg = d3.select("body")
+					 .append("svg")
+					 .attr("width",width)
+					 .attr("height",height)
+					 .append("g")
+					 .attr("transform","translate(20,0)");
+
+		var elementRoot = svg.selectAll("g")
+			.data(x0v.map(function(x) {return x ;} ))
+			.enter()
+			.append("g")
+		
+		function create_circles(svg,xstart,ystart) {
+
+		    var r = radius(xstart,ystart,x0v,y0v,npart); //calculates radial position of particle
+		    
+		    var dt = 1000;
+			
+			var color = d3.scale.category10();
+
+			var elementRoot = svg.selectAll("g")
+				.data(xstart.map(function(x) {return x   ;} ))
+				.append("g")
+				.append("circle")
+				.attr("cx", function(d) {return d;})
+				.attr("cy", function(d,i) {return ystart[i];})
+				.attr("r",5)
+				.attr("fill", function(d,i) {return color(r[i]); })
+				.attr("stroke","none")
+				.style("fill-opacity", "0.7")
+			    .transition()
+				  .delay( function(d,i) {return 10;})
+				  .duration(dt)
+				  .remove()		
+									
+		    var xvec = random_path(xstart,npart); //updates particle's position in x
+		    var yvec = random_path(ystart,npart); //updates particle's position in y
+
+			setTimeout(function() {create_circles(svg,xvec,yvec)},dt ) 
+					
+		}
+		
+		create_circles(svg,x0v,y0v)
+		
+
+		var L = 50;
+		svg.append("line")
+			.attr("x1",x0-L)
+			.attr("y1",y0)
+			.attr("x2",x0+L)
+			.attr("y2",y0)
+			.attr("stroke","black")
+			.attr("stroke-width",1)
+			.style("opacity",0.5)
+			.style("stroke-dasharray", ("4, 5"));
+
+		svg.append("line")
+			.attr("x1",x0)
+			.attr("y1",y0-L)
+			.attr("x2",x0)
+			.attr("y2",y0+L)
+			.attr("stroke","black")
+			.attr("stroke-width",1)
+			.style("opacity",0.5)
+			.style("stroke-dasharray", ("4, 5"));		
+							 	
+    </script>
+</body>
+</html>   
